@@ -261,3 +261,70 @@ export const filterUsersWithProjectsOrProducts = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+const normalizeMobileNumber = (number) => {
+  let normalized = number.replace(/\D/g, '');
+
+  if (normalized.startsWith('91')) {
+    normalized = normalized.slice(2);
+  }
+
+  if (normalized.startsWith('0')) {
+    normalized = normalized.slice(1);
+  }
+
+  if (/^\d{10}$/.test(normalized)) {
+    return normalized;
+  }
+
+  return null;
+};
+
+
+
+
+export const numCheck = async (req, res) => {
+  
+
+  try {
+    const { number } = req.params;
+    const normalizedNumber = normalizeMobileNumber(number);
+
+    if (!normalizedNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid mobile number format after normalization.',
+      });
+    }
+
+    // Lookup user by normalized mobile number
+    const user = await User.findOne({ mobileNumber: normalizedNumber });
+
+    if (user) {
+      const isRegistered = user.fname && user.email;
+
+      if (isRegistered) {
+        return res.status(200).json({
+          success: true,
+          message: 'Already registered user.',
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          message: 'User found. Please complete registration.',
+        });
+      }
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: 'Number validated. No existing user found.',
+      });
+    }
+  } catch (error) {
+    logger.error('Error during number check:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error.',
+    });
+  }
+};

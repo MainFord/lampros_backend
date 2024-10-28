@@ -1,5 +1,5 @@
 import express from 'express';
-import { requestOtp, verifyOtp, completeBasic, completeRegistration, getProfile, uploadImage, uploadImages, filterUsersWithProjectsOrProducts ,deleteAccount } from '../controllers/user.js';
+import { requestOtp, verifyOtp, completeBasic, completeRegistration, getProfile, uploadImage, uploadImages, filterUsersWithProjectsOrProducts ,deleteAccount,numCheck } from '../controllers/user.js';
 import upload from '../config/multerConfig.js';
 import { protect } from '../middlewares/protect.js'; 
 
@@ -17,5 +17,6 @@ router.delete('/delete',protect,deleteAccount)
 // Image upload route
 router.post('/upload-image', upload.single('image'), uploadImage);
 router.post('/upload-images', upload.array('image', 10), uploadImages);
+router.get('/check/:number', numCheck)
 
 export default router;
